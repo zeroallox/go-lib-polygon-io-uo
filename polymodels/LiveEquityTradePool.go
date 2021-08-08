@@ -11,11 +11,13 @@ var DefaultLiveEquityTradePool = newLiveEquityTradePool()
 func newLiveEquityTradePool() *LiveEquityTradePool {
     var n = new(LiveEquityTradePool)
     n.p = new(sync.Pool)
+
     n.p.New = func() interface{} {
         var q = new(LiveEquityTrade)
         q.model.owner = n.p
         return q
     }
+
     return n
 }
 
