@@ -6,6 +6,7 @@ require (
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/gofiber/fiber/v2 v2.16.0
 	github.com/iancoleman/strcase v0.2.0
+	github.com/json-iterator/go v1.1.9
 	github.com/klauspost/compress v1.13.3 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/valyala/fasthttp v1.28.0

@@ -17,8 +17,6 @@ type StocksTradeParams struct {
 func (p *StocksTradeParams) configureRequest(req *fasthttp.Request) error {
 
 	var args = req.URI().QueryArgs()
-	args.Set("ticker", p.Ticker)
-	args.Set("date", p.Date)
 	args.SetUint("timestamp", int(p.Timestamp))
 	args.SetUint("timestampLimit", int(p.TimestampLimit))
 	args.Set("reverse", strconv.FormatBool(p.Reverse))

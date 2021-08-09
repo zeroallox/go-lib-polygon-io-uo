@@ -1,75 +1,99 @@
 package polyrest
 
 import (
-	"encoding/json"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	"math"
 )
 
-type Result struct {
-	rez result
+type APIResponse struct {
+	ar apiResponse
 }
 
-type result struct {
-	Results     json.RawMessage `json:"results"`
-	Status      string          `json:"status"`
-	Ticker      string          `json:"ticker"`
-	Success     bool            `json:"success"`
-	RequestID   string          `json:"request_id"`
-	Count       int             `json:"count"`
-	ResultCount int             `json:"result_count"`
-	Error       string          `json:"error"`
-	NextURL     string          `json:"next_url"`
-	DBLatency   int             `json:"db_latency"`
-	HTTPCode    int
+type apiResponse struct {
+	Results      jsoniter.RawMessage `json:"results"`
+	Status       string              `json:"status"`
+	Ticker       string              `json:"ticker"`
+	Success      bool                `json:"success"`
+	RequestID    string              `json:"request_id"`
+	Count        int                 `json:"count"`
+	ResultCount  int                 `json:"result_count"`
+	Error        string              `json:"error"`
+	ErrorCode    string
+	NextURL      string `json:"next_url"`
+	DBLatency    int    `json:"db_latency"`
+	HTTPCode     int
+	ErrorCodeRaw jsoniter.RawMessage `json:"errorcode"`
+	URI          string
 }
 
-func (r *Result) IsOK() bool {
-	return r.rez.Status == "OK"
+// URI the URI of the request that made the API call. Useful for debugging
+// and only populated if debug is enabled.
+func (r *APIResponse) URI() string {
+	return r.ar.URI
 }
 
-func (r *Result) IsError() bool {
-	return r.rez.Status == "ERROR" || r.rez.Success == false
+// IsOK returns if the call is ok / success / otherwise happy.
+func (r *APIResponse) IsOK() bool {
+	return r.ar.Status == "OK"
 }
 
-func (r *Result) Error() string {
-	return r.rez.Error
+// Success returns if the API reported the call as a success.
+func (r *APIResponse) Success() bool {
+	return r.ar.Success
 }
 
-func (r *Result) Status() string {
-	return r.rez.Status
+// IsError returns if the response is an API-level (not library level) error.
+func (r *APIResponse) IsError() bool {
+	return r.ar.Status == "ERROR"
 }
 
-func (r *Result) HTTPStatusCode() int {
-	return r.rez.HTTPCode
+// Error returns the error string if the API provided one.
+func (r *APIResponse) Error() string {
+	return r.ar.Error
 }
 
-func (r *Result) RequestID() string {
-	return r.rez.RequestID
+// ErrorCode returns the ErrorCode provided by the API call if one exists.
+func (r *APIResponse) ErrorCode() string {
+	return r.ar.ErrorCode
 }
 
-func (r *Result) DBLatency() int {
-	return r.rez.DBLatency
+// Status returns the Status if the API provided one.
+func (r *APIResponse) Status() string {
+	return r.ar.Status
 }
 
-func (r *Result) Count() uint {
-	return uint(math.Max(float64(r.rez.Count), float64(r.rez.ResultCount)))
+// HTTPStatusCode returns the http code of the API call.
+func (r *APIResponse) HTTPStatusCode() int {
+	return r.ar.HTTPCode
 }
 
-func (r *Result) NextURL() string {
-	return r.rez.NextURL
+// RequestID returns the request ID if the API provided one.
+func (r *APIResponse) RequestID() string {
+	return r.ar.RequestID
 }
 
-func (r *Result) Ticker() string {
-	return r.rez.Ticker
+// DBLatency returns the database latency if the API provided it.
+func (r *APIResponse) DBLatency() int {
+	return r.ar.DBLatency
 }
 
-func (r *Result) String() string {
-	return fmt.Sprintf("%v", r.rez)
+// Count returns the result count if the API provided it.
+func (r *APIResponse) Count() uint {
+	return uint(math.Max(float64(r.ar.Count), float64(r.ar.ResultCount)))
 }
 
-func (r *Result) takeResultData() json.RawMessage {
-	var data = r.rez.Results
-	r.rez.Results = nil
-	return data
+// NextURL returns the next URL provided by the new pagination API.
+func (r *APIResponse) NextURL() string {
+	return r.ar.NextURL
+}
+
+// Ticker returns the ticker associated with the call if one was provided.
+func (r *APIResponse) Ticker() string {
+	return r.ar.Ticker
+}
+
+// String dumps APIResponse as a string.
+func (r *APIResponse) String() string {
+	return fmt.Sprintf("%v", r.ar)
 }

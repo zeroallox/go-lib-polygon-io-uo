@@ -1,7 +1,6 @@
 package polyrest
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/valyala/fasthttp"
 	"github.com/zeroallox/go-lib-polygon-io-uo/polymodels"
@@ -10,8 +9,8 @@ import (
 )
 
 // GetAllStockTrades gets all historic stock trades for the given date and ticker.
-// A *Result will only be returned if one of the calls made resulted in an API error.
-func GetAllStockTrades(apiKey string, date time.Time, ticker string) ([]*polymodels.HistoricEquityTrade, *Result, error) {
+// An *APIResponse will only be returned if one of the calls made resulted in an API error.
+func GetAllStockTrades(apiKey string, date time.Time, ticker string) ([]*polymodels.HistoricEquityTrade, *APIResponse, error) {
 
 	var req = fasthttp.AcquireRequest()
 	defer fasthttp.ReleaseRequest(req)
@@ -25,7 +24,7 @@ func GetAllStockTrades(apiKey string, date time.Time, ticker string) ([]*polymod
 	req.SetRequestURI(uri)
 
 	var params StocksTradeParams
-	params.Limit = 10000
+	params.Limit = 5000
 
 	var allTrades []*polymodels.HistoricEquityTrade
 
@@ -36,9 +35,9 @@ func GetAllStockTrades(apiKey string, date time.Time, ticker string) ([]*polymod
 			return nil, nil, err
 		}
 
-		cTrades, rez, err := getStockTrades(apiKey, req, ticker)
+		cTrades, ar, err := getStockTrades(apiKey, req, ticker)
 		if err != nil {
-			return nil, rez, err
+			return nil, ar, err
 		}
 
 		allTrades = append(allTrades, cTrades...)
@@ -69,7 +68,7 @@ func GetAllStockTrades(apiKey string, date time.Time, ticker string) ([]*polymod
 }
 
 // GetStockTrades fetches historic trades based on StocksTradeParams
-func GetStockTrades(apiKey string, params *StocksTradeParams) ([]*polymodels.HistoricEquityTrade, *Result, error) {
+func GetStockTrades(apiKey string, params *StocksTradeParams) ([]*polymodels.HistoricEquityTrade, *APIResponse, error) {
 	var req = fasthttp.AcquireRequest()
 
 	var uri = fmt.Sprintf("https://api.polygon.io/v2/ticks/stocks/trades/%v/%v", params.Ticker, params.Date)
@@ -85,28 +84,21 @@ func GetStockTrades(apiKey string, params *StocksTradeParams) ([]*polymodels.His
 	return getStockTrades(apiKey, req, params.Ticker)
 }
 
-func getStockTrades(apiKey string, req *fasthttp.Request, ticker string) ([]*polymodels.HistoricEquityTrade, *Result, error) {
+func getStockTrades(apiKey string, req *fasthttp.Request, ticker string) ([]*polymodels.HistoricEquityTrade, *APIResponse, error) {
 
 	var resp = fasthttp.AcquireResponse()
 	defer fasthttp.ReleaseResponse(resp)
 
-	rez, err := do(apiKey, req, resp)
-	if err != nil {
-		return nil, rez, err
-	}
-
 	var trades []*polymodels.HistoricEquityTrade
-	err = json.Unmarshal(rez.takeResultData(), &trades)
+	ar, err := do(apiKey, req, resp, &trades, true)
 	if err != nil {
-		return nil, rez, err
+		return nil, ar, err
 	}
 
-	// Set the ticker on each trade as it's not returned
-	// as part of the model json. It is returned as part of
-	// Result but I have a feeling this will change.
+	// Set the ticker on each trade.
 	for _, cTrade := range trades {
 		cTrade.Ticker = ticker
 	}
 
-	return trades, rez, nil
+	return trades, ar, nil
 }

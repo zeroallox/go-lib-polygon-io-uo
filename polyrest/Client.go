@@ -1,35 +1,77 @@
 package polyrest
 
 import (
-	"encoding/json"
+	jsoniter "github.com/json-iterator/go"
+	log "github.com/sirupsen/logrus"
 	"github.com/valyala/fasthttp"
 )
 
+const userAgent = "go-lib-polygon-io-uoc_0.0.1"
+
 // do performs the HTTP request to Polygons API. We apply the API key and return
-// a *Result containing the API response information and a standard error
-func do(apiKey string, req *fasthttp.Request, resp *fasthttp.Response) (*Result, error) {
+// a *APIResponse containing the API response information and a standard error
+func do(apiKey string,
+	req *fasthttp.Request,
+	resp *fasthttp.Response,
+	result interface{},
+	parseOn404 bool) (*APIResponse, error) {
+
+	if len(apiKey) == 0 {
+		return nil, ErrAPIKeyNotSet
+	}
 
 	req.URI().QueryArgs().Set("apiKey", apiKey)
+	//	req.Header.SetUserAgent(userAgent)
+
+	var ar = new(APIResponse)
+	defer func() {
+		ar.ar.Results = nil
+		ar.ar.ErrorCodeRaw = nil
+	}()
+
+	if debugMode == true {
+		ar.ar.URI = req.URI().String()
+		log.Debug(req.URI())
+	}
+
 	var err = fasthttp.Do(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
-	var rez = new(Result)
-	err = json.Unmarshal(resp.Body(), &rez.rez)
+	ar.ar.HTTPCode = resp.StatusCode()
+
+	if ar.HTTPStatusCode() != fasthttp.StatusOK {
+		if ar.HTTPStatusCode() == fasthttp.StatusNotFound && parseOn404 == false {
+			return ar, ErrAPIReturnedError
+		}
+	}
+
+	err = json.Unmarshal(resp.Body(), &ar.ar)
 	if err != nil {
-		return nil, err
+		return ar, err
 	}
 
-	rez.rez.HTTPCode = resp.StatusCode()
+	// Sometimes an ErrorCode is sometimes returned sometimes from the API
+	// sometimes as a string and sometimes as an int sometimes. If it exists we
+	// wrap it as a string regardless alltimes.
+	ar.ar.ErrorCode = jsoniter.Wrap(ar.ar.ErrorCodeRaw).ToString()
 
-	if rez.IsError() == true {
-		return rez, ErrAPIReturnedError
+	//log.Println("Error", ar.Error())
+	//log.Println("IsError", ar.IsError())
+	//log.Println("OK", ar.IsOK())
+	//log.Println("Status", ar.Status())
+
+	if ar.IsError() == true {
+		return ar, ErrAPIReturnedError
 	}
 
-	if resp.StatusCode() != fasthttp.StatusOK {
-		return rez, ErrNot200
+	if ar.ar.Results != nil {
+		err = json.Unmarshal(ar.ar.Results, result)
+		if err != nil {
+			return ar, err
+		}
 	}
 
-	return rez, nil
+	return ar, nil
 }
