@@ -3,8 +3,8 @@ package polypsv
 import (
 	"compress/gzip"
 	"fmt"
-	"github.com/zeroallox/go-lib-polygon-io-uo/polypsv/internal"
 	"io"
+	"strconv"
 	"time"
 )
 
@@ -78,42 +78,84 @@ func (this *PSVWriter) WriteObject(psvItem PSVer) error {
 }
 
 func (this *PSVWriter) WriteNonEmptyString(value string) *PSVWriter {
-	internal.WriteNonEmptyString(&this.buff, value)
+
+	if len(value) != 0 {
+		this.buff = append(this.buff, value...)
+	}
+
 	return this
 }
 
 func (this *PSVWriter) WriteBool(value bool) *PSVWriter {
-	internal.WriteBool(&this.buff, value)
+
+	var char byte = 'F'
+	if value == true {
+		char = 'T'
+	}
+
+	this.buff = append(this.buff, char)
+
 	return this
 }
 
 func (this *PSVWriter) WriteNonZeroFloat(value float64) *PSVWriter {
-	internal.WriteNonZeroFloat(&this.buff, value)
+
+	if value != 0 {
+		this.buff = strconv.AppendFloat(this.buff, value, 'g', -1, 64)
+	}
+
 	return this
 }
 
 func (this *PSVWriter) WriteNonZeroInt(value int64) *PSVWriter {
-	internal.WriteNonZeroInt(&this.buff, value)
+
+	if value != 0 {
+		this.buff = strconv.AppendInt(this.buff, value, 10)
+	}
+
 	return this
 }
 
 func (this *PSVWriter) WriteNonZeroUint(value uint64) *PSVWriter {
-	internal.WriteNonZeroUint(&this.buff, value)
+
+	if value != 0 {
+		this.buff = strconv.AppendUint(this.buff, value, 10)
+	}
+
 	return this
 }
 
 func (this *PSVWriter) WriteInt32Array(value []int32) *PSVWriter {
-	internal.WriteInt32Array(&this.buff, value)
+
+	if len(value) >= 1 {
+
+		this.buff = strconv.AppendInt(this.buff, int64(value[0]), 10)
+
+		for _, cInt := range value[1:] {
+			this.buff = append(this.buff, ';')
+			this.buff = strconv.AppendInt(this.buff, int64(cInt), 10)
+		}
+	}
+
 	return this
 }
 
 func (this *PSVWriter) WriteIntArray(value []int64) *PSVWriter {
-	internal.WriteIntArray(&this.buff, value)
+
+	if len(value) >= 1 {
+		this.buff = strconv.AppendInt(this.buff, value[0], 10)
+
+		for _, cInt := range value[1:] {
+			this.buff = append(this.buff, ';')
+			this.buff = strconv.AppendInt(this.buff, cInt, 10)
+		}
+	}
+
 	return this
 }
 
 func (this *PSVWriter) Sep() *PSVWriter {
-	internal.WriteSep(&this.buff, this.sep)
+	this.buff = append(this.buff, this.sep)
 	return this
 }
 
@@ -126,7 +168,7 @@ func (this *PSVWriter) EndLine() error {
 		}
 	}
 
-	internal.WriteNewLine(&this.buff)
+	this.buff = append(this.buff, '\n')
 
 	var err = this.writeBuffer(false)
 	if err != nil {
