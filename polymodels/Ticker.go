@@ -3,8 +3,8 @@ package polymodels
 import (
 	"encoding/binary"
 	"time"
+	"github.com/zeebo/xxh3"
 )
-import "github.com/zeebo/xxh3"
 
 type Ticker struct {
 	Ticker             string    `json:"ticker"`
