@@ -1,5 +1,7 @@
 # go-lib-polygon-io-uo
 
+Unofficial GoLang package for Polygon.io
+
 Work in progress.
 
 Very incomplete.
@@ -16,6 +18,7 @@ Probably shouldn't be public.
 
 Stahppppppp.
 
-🦩
+🍋
+
 
 
