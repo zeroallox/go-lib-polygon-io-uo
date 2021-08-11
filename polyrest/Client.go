@@ -4,6 +4,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	log "github.com/sirupsen/logrus"
 	"github.com/valyala/fasthttp"
+	"time"
 )
 
 const userAgent = "go-lib-polygon-io-uoc_0.0.1"
@@ -34,12 +35,24 @@ func do(apiKey string,
 		log.Debug(req.URI())
 	}
 
+	var retryCount = 0
+
+__RETRY:
+
 	var err = fasthttp.Do(req, resp)
 	if err != nil {
 		return nil, err
 	}
 
 	ar.ar.HTTPCode = resp.StatusCode()
+
+	if ar.HTTPStatusCode() == fasthttp.StatusGatewayTimeout {
+		if retryOn504 == true && retryCount < maxRetryCount {
+			time.Sleep(retryInterval)
+			retryCount = retryCount + 1
+			goto __RETRY
+		}
+	}
 
 	if ar.HTTPStatusCode() != fasthttp.StatusOK {
 		if ar.HTTPStatusCode() == fasthttp.StatusNotFound && parseOn404 == false {

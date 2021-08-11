@@ -2,8 +2,8 @@ package polymodels
 
 import (
 	"encoding/binary"
-	"time"
 	"github.com/zeebo/xxh3"
+	"time"
 )
 
 type Ticker struct {
