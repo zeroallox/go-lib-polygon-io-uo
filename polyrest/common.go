@@ -9,7 +9,7 @@ import (
 var json = jsoniter.ConfigDefault
 var debugMode = false
 var retryOn504 = false
-var maxRetryCount = 10
+var maxRetryCount = 50
 var retryInterval = time.Second * 5
 
 func EnableDebug() {
