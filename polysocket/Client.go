@@ -3,17 +3,18 @@ package polysocket
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
+	jsoniter "github.com/json-iterator/go"
 	log "github.com/sirupsen/logrus"
 	"github.com/zeroallox/go-lib-polygon-io-uo/polymodels"
 	"github.com/zeroallox/go-lib-polygon-io-uo/polysocket/internal"
+	"io"
 	"nhooyr.io/websocket"
 	"sync"
 	"time"
 )
 
-const readBufferSize = 1024 * 128
+const readBufferSize = 65536
 const defaultConnectionInterval = time.Second * 5
 
 type Client struct {
@@ -22,7 +23,7 @@ type Client struct {
 	autoReconnect   bool
 	connectInterval time.Duration
 	mtx             sync.Mutex
-	msgQueue        []json.RawMessage
+	msgQueue        []jsoniter.RawMessage
 	cond            *sync.Cond
 	stop            bool
 	state           State
@@ -57,7 +58,6 @@ func NewClient(options Options) (*Client, error) {
 		n.connectInterval = defaultConnectionInterval
 	}
 
-	// Launch the message processing / dispatch worker.
 	go n.beginProcessMessage()
 
 	return n, nil
@@ -135,6 +135,7 @@ func (cli *Client) connect() error {
 	cli.msgQueue = cli.msgQueue[:0]
 
 	go cli.beginReading()
+	go cli.beginPinging()
 
 	return nil
 }
@@ -148,6 +149,7 @@ func (cli *Client) connect() error {
 func (cli *Client) Disconnect() error {
 	cli.autoReconnect = false
 	cli.setState(STDisconnected)
+
 	return cli.closeWSConnection()
 }
 
@@ -157,28 +159,8 @@ func (cli *Client) Disconnect() error {
 func (cli *Client) Close() error {
 	cli.shutdownProcessor()
 	cli.setState(STClosed)
+
 	return cli.closeWSConnection()
-}
-
-// Gracefully closes the websocket connection.
-func (cli *Client) closeWSConnection() error {
-	cli.mtx.Lock()
-	defer cli.mtx.Unlock()
-
-	if cli.ws == nil {
-		return nil
-	}
-
-	return cli.ws.Close(websocket.StatusNormalClosure, "")
-}
-
-// shutdownProcessor wakes up and kills the processing thread.
-func (cli *Client) shutdownProcessor() {
-	cli.cond.L.Lock()
-	defer cli.cond.L.Unlock()
-
-	cli.stop = true
-	cli.cond.Signal()
 }
 
 // Subscribe subscribes to the specified topic and symbols.
@@ -221,22 +203,54 @@ func (cli *Client) modSubscription(action internal.SubAction, topic Topic, symbo
 	return cli.writeMessage(jData)
 }
 
+// Gracefully closes the websocket connection.
+func (cli *Client) closeWSConnection() error {
+	cli.mtx.Lock()
+	defer cli.mtx.Unlock()
+
+	if cli.ws == nil {
+		return nil
+	}
+
+	return cli.ws.Close(websocket.StatusNormalClosure, "")
+}
+
+// shutdownProcessor wakes up and kills the processing thread.
+func (cli *Client) shutdownProcessor() {
+	cli.cond.L.Lock()
+	defer cli.cond.L.Unlock()
+
+	cli.stop = true
+	cli.cond.Signal()
+}
+
+func (cli *Client) isStopped() bool {
+	cli.cond.L.Lock()
+	defer cli.cond.L.Unlock()
+
+	return cli.stop
+}
+
 // beginReading reads from the websocket and submits messages
 // to the processing queue.
 func (cli *Client) beginReading() {
 
 	defer func() {
 		if cli.autoReconnect == true {
+			time.Sleep(cli.connectInterval)
 			go cli.reconnect()
 		}
 	}()
 
 	var buff [readBufferSize]byte
 
+	var ctx = context.Background()
+
 	for {
 
-		msgType, reader, err := cli.ws.Reader(context.Background())
+		msgType, reader, err := cli.ws.Reader(ctx)
 		if err != nil {
+			log.WithError(err).Error("get reader failed")
 			return
 		}
 
@@ -245,16 +259,28 @@ func (cli *Client) beginReading() {
 			return
 		}
 
-		bytesRead, err := reader.Read(buff[:])
-		if err != nil {
-			return
+		var cursor = 0
+		for {
+			bytesRead, err := reader.Read(buff[cursor : readBufferSize-cursor])
+			if err != nil {
+				if err == io.EOF {
+					break
+				}
+				log.WithError(err).Error("reader error")
+				return
+			}
+
+			cursor = cursor + bytesRead
 		}
 
-		var data = buff[0:bytesRead]
+		var data = buff[0:cursor]
 
-		var msgs []json.RawMessage
+		var msgs []jsoniter.RawMessage
 		err = json.Unmarshal(data, &msgs)
 		if err != nil {
+			//log.Println(string(data))
+			//log.WithError(err).Error("unmarshal failed")
+			//log.Println("LEN", len(data))
 			return
 		}
 
@@ -265,6 +291,26 @@ func (cli *Client) beginReading() {
 		cli.cond.Signal()
 	}
 
+}
+
+func (cli *Client) beginPinging() {
+
+	var ctx = context.Background()
+
+	for {
+
+		if cli.isStopped() == true {
+			return
+		}
+
+		var err = cli.ws.Ping(ctx)
+		if err != nil {
+			log.WithError(err).Error("pinging failed")
+			return
+		}
+
+		time.Sleep(3 * time.Second)
+	}
 }
 
 // reconnect starts the reconnection cycle.
@@ -292,7 +338,7 @@ func (cli *Client) beginProcessMessage() {
 		log.Trace("Client: Exit Processing Thread")
 	}()
 
-	var localQueue []json.RawMessage
+	var localQueue []jsoniter.RawMessage
 
 	for {
 
@@ -301,10 +347,16 @@ func (cli *Client) beginProcessMessage() {
 			for len(cli.msgQueue) == 0 {
 
 				if cli.stop == true {
+					cli.cond.L.Unlock()
 					return
 				}
 
 				cli.cond.Wait()
+			}
+
+			if cli.stop == true {
+				cli.cond.L.Unlock()
+				return
 			}
 
 			localQueue = append(localQueue, cli.msgQueue...)
@@ -325,7 +377,7 @@ var statusPrefix = []byte("{\"ev\":\"status\"")
 // handleMessages routes each message to the correct handler. We specifically
 // do not break and return on error as it is possible for a single message
 // to be malformed.
-func (cli *Client) handleMessages(msgs []json.RawMessage) {
+func (cli *Client) handleMessages(msgs []jsoniter.RawMessage) {
 
 	var err error
 
@@ -349,7 +401,7 @@ func (cli *Client) handleMessages(msgs []json.RawMessage) {
 	}
 }
 
-func (cli *Client) handleStatusMessage(msg json.RawMessage) error {
+func (cli *Client) handleStatusMessage(msg jsoniter.RawMessage) error {
 
 	var sm internal.Message
 
@@ -382,7 +434,7 @@ func (cli *Client) handleStatusMessage(msg json.RawMessage) error {
 }
 
 // handleLiveEquityQuote decodes and dispatches Quote messages
-func (cli *Client) handleLiveEquityQuote(msg json.RawMessage) error {
+func (cli *Client) handleLiveEquityQuote(msg jsoniter.RawMessage) error {
 
 	if cli.onDataReceived == nil {
 		return nil
@@ -400,7 +452,7 @@ func (cli *Client) handleLiveEquityQuote(msg json.RawMessage) error {
 }
 
 // handleLiveEquityTrade decodes and dispatches Trade messages
-func (cli *Client) handleLiveEquityTrade(msg json.RawMessage) error {
+func (cli *Client) handleLiveEquityTrade(msg jsoniter.RawMessage) error {
 
 	if cli.onDataReceived == nil {
 		return nil

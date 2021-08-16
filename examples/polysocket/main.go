@@ -42,11 +42,11 @@ func main() {
 		switch data.(type) {
 		case *polymodels.LiveEquityQuote:
 			var quote = data.(*polymodels.LiveEquityQuote)
-			log.Println(quote)
+			log.Println("Quote:", quote)
 			break
 		case *polymodels.LiveEquityTrade:
 			var trade = data.(*polymodels.LiveEquityTrade)
-			log.Println(trade)
+			log.Println("Trade:", trade)
 			break
 		}
 

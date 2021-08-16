@@ -1,8 +1,9 @@
 package polypsv
 
 import (
-	"compress/gzip"
 	"fmt"
+	"github.com/klauspost/compress/flate"
+	"github.com/klauspost/compress/gzip"
 	"io"
 	"strconv"
 	"time"
@@ -25,7 +26,7 @@ func NewPSVWriter(file *PSVFile, writer io.WriteCloser) (*PSVWriter, error) {
 
 	if file.Compressed() == true {
 
-		gzr, err := gzip.NewWriterLevel(n.writer, 5)
+		gzr, err := gzip.NewWriterLevel(n.writer, flate.BestSpeed)
 		if err != nil {
 			return nil, err
 		}

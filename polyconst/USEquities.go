@@ -51,73 +51,73 @@ const (
 	USEQTP_UTP_3   USEquityTapeId = 3
 )
 
+// USEquityTradeCondition
+//  Note: Some codes were remapped by Polygon and are now unused.
+//	19 <<< Was Duplicate, now unused
+//	25 <<< Was Duplicate, now unused
+//	28 <<< Was Duplicate, now unused
 type USEquityTradeCondition int
 
 const (
-	USEQTC_Invalid            USEquityTradeCondition = -1
-	USEQTC_Regular            USEquityTradeCondition = 0
-	USEQTC_Acquisition        USEquityTradeCondition = 1
-	USEQTC_AveragePrice       USEquityTradeCondition = 2
-	USEQTC_AutomaticExecution USEquityTradeCondition = 3
-	USEQTC_Bunched            USEquityTradeCondition = 4
-	USEQTC_BunchSold          USEquityTradeCondition = 5
-	USEQTC_CAPElection        USEquityTradeCondition = 6
-	USEQTC_CashTrade          USEquityTradeCondition = 7
-	USEQTC_Closing            USEquityTradeCondition = 8
-	USEQTC_Cross              USEquityTradeCondition = 9
-	USEQTC_DerivativelyPriced USEquityTradeCondition = 10
-	USEQTC_Distribution       USEquityTradeCondition = 11
-	USEQTC_FormTExtendedHours USEquityTradeCondition = 12
-	USEQTC_FormTOutOfSequence USEquityTradeCondition = 13
-	USEQTC_InterMarketSweep   USEquityTradeCondition = 14
-	USEQTC_OfficialClose      USEquityTradeCondition = 15
-	USEQTC_OfficialOpen       USEquityTradeCondition = 16
-	USEQTC_Opening            USEquityTradeCondition = 17
-	USEQTC_Reopening          USEquityTradeCondition = 18
-	//	19 <<< DUPLICATE
-	USEQTC_NextDay             USEquityTradeCondition = 20
-	USEQTC_PriceVariation      USEquityTradeCondition = 21
-	USEQTC_PriorReferencePrice USEquityTradeCondition = 22
-	USEQTC_Rule155AMEX         USEquityTradeCondition = 23
-	USEQTC_Rule127NYSE         USEquityTradeCondition = 24
-	//	25 <<< DUPLICATE
-	USEQTC_Opened              USEquityTradeCondition = 26
-	USEQTC_RegularStoppedStock USEquityTradeCondition = 27
-	//	28 <<< DUPLICATE
-	USEQTC_Seller                            USEquityTradeCondition = 29
-	USEQTC_SoldLast                          USEquityTradeCondition = 30
-	USEQTC_SoldLastStoppedStock              USEquityTradeCondition = 31
-	USEQTC_SoldOutOfSequence                 USEquityTradeCondition = 32
-	USEQTC_SoldOutOfSequenceStoppedStock     USEquityTradeCondition = 33
-	USEQTC_Split                             USEquityTradeCondition = 34
-	USEQTC_StockOption                       USEquityTradeCondition = 35
-	USEQTC_YellowFlag                        USEquityTradeCondition = 36
-	USEQTC_OddLot                            USEquityTradeCondition = 37
-	USEQTC_CorrectedConsolidatedClosingPrice USEquityTradeCondition = 38
-	USEQTC_Unknown                           USEquityTradeCondition = 39
-	USEQTC_Held                              USEquityTradeCondition = 40
-	USEQTC_TradeThruExempt                   USEquityTradeCondition = 41
-	USEQTC_NonEligible                       USEquityTradeCondition = 42
-	USEQTC_NonEligibleExtended               USEquityTradeCondition = 43
-	USEQTC_Cancelled                         USEquityTradeCondition = 44
-	USEQTC_Recovery                          USEquityTradeCondition = 45
-	USEQTC_Correction                        USEquityTradeCondition = 46
-	USEQTC_AsOf                              USEquityTradeCondition = 47
-	USEQTC_AsOfCorrection                    USEquityTradeCondition = 48
-	USEQTC_AsOfCancel                        USEquityTradeCondition = 49
-	USEQTC_OOB                               USEquityTradeCondition = 50
-	USEQTC_Summary                           USEquityTradeCondition = 51
-	USEQTC_Contingent                        USEquityTradeCondition = 52
-	USEQTC_ContingentQualified               USEquityTradeCondition = 53
-	USEQTC_Errored                           USEquityTradeCondition = 54
-	USEQTC_OpeningReopeningTradeDetail       USEquityTradeCondition = 55
-	USEQTC_IntradayTradeDetail               USEquityTradeCondition = 56
-	//
-	USEQTC_SSRActivated   USEquityTradeCondition = 57
-	USEQTC_SSRContinued   USEquityTradeCondition = 58
-	USEQTC_SSRDeactivated USEquityTradeCondition = 59
-	USEQTC_SSRInEffect    USEquityTradeCondition = 60
-	//
+	USEQTC_Invalid                                           USEquityTradeCondition = -1
+	USEQTC_Regular                                           USEquityTradeCondition = 0
+	USEQTC_Acquisition                                       USEquityTradeCondition = 1
+	USEQTC_AveragePrice                                      USEquityTradeCondition = 2
+	USEQTC_AutomaticExecution                                USEquityTradeCondition = 3
+	USEQTC_Bunched                                           USEquityTradeCondition = 4
+	USEQTC_BunchSold                                         USEquityTradeCondition = 5
+	USEQTC_CAPElection                                       USEquityTradeCondition = 6
+	USEQTC_CashTrade                                         USEquityTradeCondition = 7
+	USEQTC_Closing                                           USEquityTradeCondition = 8
+	USEQTC_Cross                                             USEquityTradeCondition = 9
+	USEQTC_DerivativelyPriced                                USEquityTradeCondition = 10
+	USEQTC_Distribution                                      USEquityTradeCondition = 11
+	USEQTC_FormTExtendedHours                                USEquityTradeCondition = 12
+	USEQTC_FormTOutOfSequence                                USEquityTradeCondition = 13
+	USEQTC_InterMarketSweep                                  USEquityTradeCondition = 14
+	USEQTC_OfficialClose                                     USEquityTradeCondition = 15
+	USEQTC_OfficialOpen                                      USEquityTradeCondition = 16
+	USEQTC_Opening                                           USEquityTradeCondition = 17
+	USEQTC_Reopening                                         USEquityTradeCondition = 18
+	USEQTC_NextDay                                           USEquityTradeCondition = 20
+	USEQTC_PriceVariation                                    USEquityTradeCondition = 21
+	USEQTC_PriorReferencePrice                               USEquityTradeCondition = 22
+	USEQTC_Rule155AMEX                                       USEquityTradeCondition = 23
+	USEQTC_Rule127NYSE                                       USEquityTradeCondition = 24
+	USEQTC_Opened                                            USEquityTradeCondition = 26
+	USEQTC_RegularStoppedStock                               USEquityTradeCondition = 27
+	USEQTC_Seller                                            USEquityTradeCondition = 29
+	USEQTC_SoldLast                                          USEquityTradeCondition = 30
+	USEQTC_SoldLastStoppedStock                              USEquityTradeCondition = 31
+	USEQTC_SoldOutOfSequence                                 USEquityTradeCondition = 32
+	USEQTC_SoldOutOfSequenceStoppedStock                     USEquityTradeCondition = 33
+	USEQTC_Split                                             USEquityTradeCondition = 34
+	USEQTC_StockOption                                       USEquityTradeCondition = 35
+	USEQTC_YellowFlag                                        USEquityTradeCondition = 36
+	USEQTC_OddLot                                            USEquityTradeCondition = 37
+	USEQTC_CorrectedConsolidatedClosingPrice                 USEquityTradeCondition = 38
+	USEQTC_Unknown                                           USEquityTradeCondition = 39
+	USEQTC_Held                                              USEquityTradeCondition = 40
+	USEQTC_TradeThruExempt                                   USEquityTradeCondition = 41
+	USEQTC_NonEligible                                       USEquityTradeCondition = 42
+	USEQTC_NonEligibleExtended                               USEquityTradeCondition = 43
+	USEQTC_Cancelled                                         USEquityTradeCondition = 44
+	USEQTC_Recovery                                          USEquityTradeCondition = 45
+	USEQTC_Correction                                        USEquityTradeCondition = 46
+	USEQTC_AsOf                                              USEquityTradeCondition = 47
+	USEQTC_AsOfCorrection                                    USEquityTradeCondition = 48
+	USEQTC_AsOfCancel                                        USEquityTradeCondition = 49
+	USEQTC_OOB                                               USEquityTradeCondition = 50
+	USEQTC_Summary                                           USEquityTradeCondition = 51
+	USEQTC_Contingent                                        USEquityTradeCondition = 52
+	USEQTC_ContingentQualified                               USEquityTradeCondition = 53
+	USEQTC_Errored                                           USEquityTradeCondition = 54
+	USEQTC_OpeningReopeningTradeDetail                       USEquityTradeCondition = 55
+	USEQTC_IntradayTradeDetail                               USEquityTradeCondition = 56
+	USEQTC_SSRActivated                                      USEquityTradeCondition = 57
+	USEQTC_SSRContinued                                      USEquityTradeCondition = 58
+	USEQTC_SSRDeactivated                                    USEquityTradeCondition = 59
+	USEQTC_SSRInEffect                                       USEquityTradeCondition = 60
 	USEQTC_FinancialStatusNormal                             USEquityTradeCondition = 61
 	USEQTC_FinancialStatusBankrupt                           USEquityTradeCondition = 62
 	USEQTC_FinancialStatusDeficient                          USEquityTradeCondition = 63
