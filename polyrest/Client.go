@@ -46,12 +46,15 @@ __RETRY:
 
 	ar.ar.HTTPCode = resp.StatusCode()
 
-	if ar.HTTPStatusCode() == fasthttp.StatusGatewayTimeout {
+	if ar.HTTPStatusCode() == fasthttp.StatusGatewayTimeout ||
+		ar.HTTPStatusCode() == fasthttp.StatusBadGateway {
+
 		if retryOn504 == true && retryCount < maxRetryCount {
 			time.Sleep(retryInterval)
 			retryCount = retryCount + 1
 			goto __RETRY
 		}
+
 	}
 
 	if ar.HTTPStatusCode() != fasthttp.StatusOK {
