@@ -42,7 +42,7 @@ func main() {
 	}
 	defer hFile.Close()
 
-	// Create a new PSV PSVWriter
+	// Create a new PSV Writer
 	writer, err := polypsv.NewPSVWriter(psvFile, hFile)
 	if err != nil {
 		panic(err)

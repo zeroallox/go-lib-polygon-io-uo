@@ -1,6 +1,6 @@
 package polypsv
 
 type PSVer interface {
-	ToPSV(writer *PSVWriter) error
+	ToPSV(writer *Writer) error
 	FromPSV([][]byte) error
 }

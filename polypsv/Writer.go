@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-type PSVWriter struct {
+type Writer struct {
 	gzw            *gzip.Writer
 	writer         io.Writer
 	header         []byte
@@ -18,9 +18,9 @@ type PSVWriter struct {
 	didWriteHeader bool
 }
 
-func NewPSVWriter(file *PSVFile, writer io.WriteCloser) (*PSVWriter, error) {
+func NewPSVWriter(file *PSVFile, writer io.WriteCloser) (*Writer, error) {
 
-	var n = new(PSVWriter)
+	var n = new(Writer)
 	n.writer = writer
 	n.sep = pipeCharByte
 
@@ -41,17 +41,17 @@ func NewPSVWriter(file *PSVFile, writer io.WriteCloser) (*PSVWriter, error) {
 	return n, nil
 }
 
-func (this *PSVWriter) SetHeader(header []byte) {
+func (this *Writer) SetHeader(header []byte) {
 	this.header = header
 }
 
-func (this *PSVWriter) Header() []byte {
+func (this *Writer) Header() []byte {
 	return this.header
 }
 
 // Close Flushes the internal line buffer and cleans up.
 // Does NOT close the underlying file handle / io.Writer.
-func (this *PSVWriter) Close() error {
+func (this *Writer) Close() error {
 
 	var err = this.writeBuffer(true)
 	if err != nil {
@@ -68,7 +68,7 @@ func (this *PSVWriter) Close() error {
 	return nil
 }
 
-func (this *PSVWriter) WriteObject(psvItem PSVer) error {
+func (this *Writer) WriteObject(psvItem PSVer) error {
 	var err = psvItem.ToPSV(this)
 
 	if err != nil {
@@ -78,7 +78,7 @@ func (this *PSVWriter) WriteObject(psvItem PSVer) error {
 	return this.EndLine()
 }
 
-func (this *PSVWriter) WriteNonEmptyString(value string) *PSVWriter {
+func (this *Writer) WriteNonEmptyString(value string) *Writer {
 
 	if len(value) != 0 {
 		this.buff = append(this.buff, value...)
@@ -87,7 +87,7 @@ func (this *PSVWriter) WriteNonEmptyString(value string) *PSVWriter {
 	return this
 }
 
-func (this *PSVWriter) WriteBool(value bool) *PSVWriter {
+func (this *Writer) WriteBool(value bool) *Writer {
 
 	var char byte = 'F'
 	if value == true {
@@ -99,7 +99,7 @@ func (this *PSVWriter) WriteBool(value bool) *PSVWriter {
 	return this
 }
 
-func (this *PSVWriter) WriteNonZeroFloat(value float64) *PSVWriter {
+func (this *Writer) WriteNonZeroFloat(value float64) *Writer {
 
 	if value != 0 {
 		this.buff = strconv.AppendFloat(this.buff, value, 'g', -1, 64)
@@ -108,7 +108,7 @@ func (this *PSVWriter) WriteNonZeroFloat(value float64) *PSVWriter {
 	return this
 }
 
-func (this *PSVWriter) WriteNonZeroInt(value int64) *PSVWriter {
+func (this *Writer) WriteNonZeroInt(value int64) *Writer {
 
 	if value != 0 {
 		this.buff = strconv.AppendInt(this.buff, value, 10)
@@ -117,7 +117,7 @@ func (this *PSVWriter) WriteNonZeroInt(value int64) *PSVWriter {
 	return this
 }
 
-func (this *PSVWriter) WriteNonZeroUint(value uint64) *PSVWriter {
+func (this *Writer) WriteNonZeroUint(value uint64) *Writer {
 
 	if value != 0 {
 		this.buff = strconv.AppendUint(this.buff, value, 10)
@@ -126,7 +126,7 @@ func (this *PSVWriter) WriteNonZeroUint(value uint64) *PSVWriter {
 	return this
 }
 
-func (this *PSVWriter) WriteInt32Array(value []int32) *PSVWriter {
+func (this *Writer) WriteInt32Array(value []int32) *Writer {
 
 	if len(value) >= 1 {
 
@@ -141,7 +141,7 @@ func (this *PSVWriter) WriteInt32Array(value []int32) *PSVWriter {
 	return this
 }
 
-func (this *PSVWriter) WriteIntArray(value []int64) *PSVWriter {
+func (this *Writer) WriteIntArray(value []int64) *Writer {
 
 	if len(value) >= 1 {
 		this.buff = strconv.AppendInt(this.buff, value[0], 10)
@@ -155,12 +155,12 @@ func (this *PSVWriter) WriteIntArray(value []int64) *PSVWriter {
 	return this
 }
 
-func (this *PSVWriter) Sep() *PSVWriter {
+func (this *Writer) Sep() *Writer {
 	this.buff = append(this.buff, this.sep)
 	return this
 }
 
-func (this *PSVWriter) EndLine() error {
+func (this *Writer) EndLine() error {
 
 	if this.didWriteHeader == false {
 		var err = this.writeHeader()
@@ -181,7 +181,7 @@ func (this *PSVWriter) EndLine() error {
 	return nil
 }
 
-func (this *PSVWriter) writeBuffer(sync bool) error {
+func (this *Writer) writeBuffer(sync bool) error {
 
 	_, err := this.writer.Write(this.buff)
 	if err != nil {
@@ -200,7 +200,7 @@ func (this *PSVWriter) writeBuffer(sync bool) error {
 	return nil
 }
 
-func (this *PSVWriter) writeHeader() error {
+func (this *Writer) writeHeader() error {
 
 	this.didWriteHeader = true
 
@@ -217,28 +217,3 @@ func (this *PSVWriter) writeHeader() error {
 	return nil
 
 }
-
-//
-//var ErrFilePathNotAbsolute = errors.New("filepath not absolute")
-//
-//func MakeFilePath(absFilePath string, compress bool) (string, error) {
-//
-//	dirName, fileName := filepath.Split(absFilePath)
-//
-//	fileName = strings.ReplaceAll(fileName, ".psv", "")
-//	fileName = strings.ReplaceAll(fileName, ".gz", "")
-//
-//	fileName = fileName + ".psv"
-//
-//	if compress == true {
-//		fileName = fileName + ".gz"
-//	}
-//
-//	absFilePath = filepath.Join(dirName, fileName)
-//
-//	return absFilePath, nil
-//}
-//
-//func bytesToString(by []byte) string {
-//	return *(*string)(unsafe.Pointer(&by))
-//}

@@ -42,6 +42,7 @@ func NewReader(reader io.Reader, isCompressed bool) (*Reader, error) {
 }
 
 var ErrScanFailed = errors.New("scan failed")
+var ErrUnhandledModelType = errors.New("unhandled model type")
 
 func (rd *Reader) NextLine() ([][]byte, error) {
 
@@ -67,3 +68,10 @@ func (rd *Reader) NextObject(obj PSVer) error {
 
 	return obj.FromPSV(cLine)
 }
+
+//func readHistoricEquityTrade(dst *polymodels.HistoricEquityTrade, line [][]byte) error {
+//
+//	log.Println(line)
+//
+//	return nil
+//}

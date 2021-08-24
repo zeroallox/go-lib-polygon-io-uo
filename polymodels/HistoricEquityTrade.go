@@ -43,7 +43,7 @@ func (et *HistoricEquityTrade) Hash() uint64 {
 	return xxh3.Hash(buff[:])
 }
 
-func (et *HistoricEquityTrade) ToPSV(psvw *polypsv.PSVWriter) error {
+func (et *HistoricEquityTrade) ToPSV(psvw *polypsv.Writer) error {
 
 	psvw.WriteNonEmptyString(et.Ticker).Sep()
 	psvw.WriteNonZeroInt(et.SIPTimestamp).Sep()
@@ -65,76 +65,76 @@ func (et *HistoricEquityTrade) ToPSV(psvw *polypsv.PSVWriter) error {
 
 func (et *HistoricEquityTrade) FromPSV(src [][]byte) error {
 
-	panic("asss")
-	//
-	//var err error = nil
-	//
-	//et.Ticker = psvutils.ReadString(src[0])
-	//et.SIPTimestamp, err = psvutils.ReadInt(src[1])
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//et.ExchangeTimestamp, err = psvutils.ReadInt(src[2])
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//et.TRFTimestamp, err = psvutils.ReadInt(src[3])
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//trfid, err := psvutils.ReadInt(src[4])
-	//if err != nil {
-	//	return err
-	//}
-	//et.TRFID = int32(trfid)
-	//
-	//corr, err := psvutils.ReadInt(src[5])
-	//if err != nil {
-	//	return err
-	//}
-	//et.Correction = int(corr)
-	//
-	//sq, err := psvutils.ReadInt(src[6])
-	//if err != nil {
-	//	return err
-	//}
-	//et.SequenceNumber = int(sq)
-	//
-	//et.Id = psvutils.ReadString(src[7])
-	//et.OriginalID = psvutils.ReadString(src[8])
-	//
-	//xid, err := psvutils.ReadInt(src[9])
-	//if err != nil {
-	//	return err
-	//}
-	//et.ExchangeID = int32(xid)
-	//
-	//vol, err := psvutils.ReadInt(src[10])
-	//if err != nil {
-	//	return err
-	//}
-	//et.Volume = vol
-	//
-	//cond, err := psvutils.ReadInt32Array(src[11])
-	//if err != nil {
-	//	return err
-	//}
-	//et.Conditions = cond
-	//
-	//price, err := psvutils.ReadFloat(src[12])
-	//if err != nil {
-	//	return err
-	//}
-	//et.Price = price
-	//
-	//tape, err := psvutils.ReadInt(src[13])
-	//if err != nil {
-	//	return err
-	//}
-	//et.Tape = int8(tape)
+	var err error = nil
+
+	et.Ticker = polypsv.ReadString(src[0])
+
+	et.SIPTimestamp, err = polypsv.ReadInt(src[1])
+	if err != nil {
+		return err
+	}
+
+	et.ExchangeTimestamp, err = polypsv.ReadInt(src[2])
+	if err != nil {
+		return err
+	}
+
+	et.TRFTimestamp, err = polypsv.ReadInt(src[3])
+	if err != nil {
+		return err
+	}
+
+	trfID, err := polypsv.ReadInt(src[4])
+	if err != nil {
+		return err
+	}
+	et.TRFID = int32(trfID)
+
+	corr, err := polypsv.ReadInt(src[5])
+	if err != nil {
+		return err
+	}
+	et.Correction = int(corr)
+
+	sq, err := polypsv.ReadInt(src[6])
+	if err != nil {
+		return err
+	}
+	et.SequenceNumber = int(sq)
+
+	et.Id = polypsv.ReadString(src[7])
+	et.OriginalID = polypsv.ReadString(src[8])
+
+	exchangeID, err := polypsv.ReadInt(src[9])
+	if err != nil {
+		return err
+	}
+	et.ExchangeID = int32(exchangeID)
+
+	vol, err := polypsv.ReadInt(src[10])
+	if err != nil {
+		return err
+	}
+	et.Volume = vol
+
+	cond, err := polypsv.ReadInt32Array(src[11])
+	if err != nil {
+		return err
+	}
+	et.Conditions = cond
+
+	price, err := polypsv.ReadFloat(src[12])
+	if err != nil {
+		return err
+	}
+	et.Price = price
+
+	tape, err := polypsv.ReadInt(src[13])
+	if err != nil {
+		return err
+	}
+
+	et.Tape = int8(tape)
 
 	return nil
 }
@@ -199,9 +199,3 @@ func (et *HistoricEquityTrade) IsEqual(other *HistoricEquityTrade) bool {
 
 	return true
 }
-
-//func (et *HistoricEquityTrade) Copy() HistoricEquityTrade {
-//	var cp = *et
-//	cp.Conditions = append([]int32(nil), et.Conditions...)
-//	return cp
-//}
