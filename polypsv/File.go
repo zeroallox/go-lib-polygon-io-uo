@@ -11,23 +11,27 @@ import (
 	"time"
 )
 
-var regexFileName = regexp.MustCompile(`(?m)(\w+)-(\w+)-(\d+-\d+-\d+)\.(gz|psv)`)
+var regexFileName = regexp.MustCompile(`(?m)(\w+)-(\w+)-(\w+)-(\d+-\d+-\d+)\.(gz|psv)`)
 
 type PSVFile struct {
 	locale     polyconst.Locale
 	market     polyconst.Market
+	dataType   polyconst.DataType
 	date       time.Time
 	compressed bool
 }
 
 func NewPSVFile(locale polyconst.Locale,
 	market polyconst.Market,
-	date time.Time, compressed bool) *PSVFile {
+	dataType polyconst.DataType,
+	date time.Time,
+	compressed bool) *PSVFile {
 
 	var n = new(PSVFile)
 
 	n.locale = locale
 	n.market = market
+	n.dataType = dataType
 	n.date = date
 	n.compressed = compressed
 
@@ -41,7 +45,8 @@ func NewFileFromPath(path string) (*PSVFile, error) {
 	var fileName = filepath.Base(path)
 
 	var parts = regexFileName.FindStringSubmatch(fileName)
-	if len(parts) != 5 {
+
+	if len(parts) != 6 {
 		return nil, ErrInvalidFileName
 	}
 
@@ -55,13 +60,18 @@ func NewFileFromPath(path string) (*PSVFile, error) {
 		return nil, ErrInvalidFileName
 	}
 
-	date, err := polyutils.TimeFromStringDate(parts[3], localeTimeZoneMap[locale])
+	var dataType = polyconst.DataTypeFromCode(parts[3])
+	if dataType == polyconst.DT_Invalid {
+		return nil, ErrInvalidFileName
+	}
+
+	date, err := polyutils.TimeFromStringDate(parts[4], localeTimeZoneMap[locale])
 	if err != nil || date.IsZero() {
 		return nil, ErrInvalidFileName
 	}
 
 	var compressed = false
-	switch parts[4] {
+	switch parts[5] {
 	case "gz":
 		compressed = true
 	case "psv":
@@ -71,7 +81,9 @@ func NewFileFromPath(path string) (*PSVFile, error) {
 	}
 
 	var n = new(PSVFile)
+	n.locale = locale
 	n.market = market
+	n.dataType = dataType
 	n.date = date
 	n.locale = locale
 	n.compressed = compressed
@@ -95,15 +107,31 @@ func (file *PSVFile) Compressed() bool {
 	return file.compressed
 }
 
-func (file *PSVFile) MakeDir() string {
+// MakeDirPath generates the directory for file.
+//  Example:
+//  polygon/us/stocks/trades/2000/2000-01
+func MakeDirPath(file *PSVFile) string {
+
 	year, month, _ := file.date.Date()
 
-	return strings.ToLower(fmt.Sprintf("polygon/%v/%v/%04d/%04d-%02d", file.locale.Code(), file.market.Code(),
+	return strings.ToLower(fmt.Sprintf("polygon/%v/%v/%v/%04d/%04d-%02d",
+		file.locale.Code(),
+		file.market.Code(),
+		file.dataType.Code(),
 		year,
 		year, month))
+
 }
 
-func (file *PSVFile) MakeFileName(compressed bool) string {
+// MakeFileName generates a file name for file.
+func MakeFileName(file *PSVFile) string {
+	return makeFileName(file, file.compressed)
+}
+
+// makeFileName returns the file name for a PSVFile. Compressed is
+// specified separately and overrides file.compressed.
+func makeFileName(file *PSVFile, compressed bool) string {
+
 	year, month, day := file.date.Date()
 
 	var ext = "psv"
@@ -111,11 +139,17 @@ func (file *PSVFile) MakeFileName(compressed bool) string {
 		ext = "gz"
 	}
 
-	return strings.ToLower(fmt.Sprintf("%s-%s-%04d-%02d-%02d.%v",
-		file.locale.Code(), file.market.Code(),
+	return strings.ToLower(fmt.Sprintf("%s-%s-%s-%04d-%02d-%02d.%v",
+		file.locale.Code(),
+		file.market.Code(),
+		file.dataType.Code(),
 		year, month, day, ext))
+
 }
 
-func (file *PSVFile) MakeABSFilePath(compressed bool) string {
-	return filepath.Join(file.MakeDir(), file.MakeFileName(compressed))
+// MakeABSFilePath returns the absolute file path for file.
+//  Example:
+//  polygon/us/stocks/trades/2000/2000-01/us-stocks-trades-2000-01-01.gz
+func MakeABSFilePath(file *PSVFile) string {
+	return filepath.Join(MakeDirPath(file), MakeFileName(file))
 }

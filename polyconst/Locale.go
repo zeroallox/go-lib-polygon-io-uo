@@ -25,7 +25,7 @@ const (
 	LOC_China        Locale = 17
 	LOC_Switzerland  Locale = 18
 	LOC_Sweden       Locale = 19
-	loc_max          Locale = 20
+	loc_max          Locale = iota
 )
 
 func (mkt Locale) Code() string {

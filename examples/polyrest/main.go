@@ -28,23 +28,26 @@ func main() {
 	//p.Limit = 1
 
 	polyrest.EnableDebug()
+	polyrest.EnableAutoRetry()
 
-	var ds = "2021-01-02"
-
+	var ds = "2021-01-04"
 	tm, err := polyutils.TimeFromStringDate(ds, polyconst.NYCTime)
-
-	trades, ar, err := polyrest.GetAllStockTrades(apiKey, tm, "999")
 	if err != nil {
-		log.Println("Err", err)
-		if ar != nil {
-			log.Println("APIResponse", ar.String())
-		}
+		panic(err)
 	}
 
-	log.Println("Trades", len(trades))
+	trades, ar, err := polyrest.GetAllStockTrades(apiKey, tm, "AAPL")
+	if err != nil {
+		log.Println("lib-level error", err)
+		return
+	}
 
+	if ar != nil && ar.IsError() == true {
+		log.Println("api-level error", ar.Error())
+	}
+
+	log.Println("Got Trades:", len(trades))
 	for _, cTrade := range trades {
-		continue
 		log.Println(cTrade)
 	}
 

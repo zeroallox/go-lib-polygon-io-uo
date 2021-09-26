@@ -6,8 +6,8 @@ import (
 )
 
 // GetAllReferenceTickers returns ALL tickers both ACTIVE and INACTIVE.
-//A *APIResponse will only be returned if one of the calls made resulted in an API error.
-func GetAllReferenceTickers(apiKey string) ([]*polymodels.Ticker, *APIResponse, error) {
+//A *Response will only be returned if one of the calls made resulted in an API error.
+func GetAllReferenceTickers(apiKey string) ([]*polymodels.Ticker, *Response, error) {
 
 	var req = fasthttp.AcquireRequest()
 	req.SetRequestURI("https://api.polygon.io/v3/reference/tickers")
@@ -70,7 +70,7 @@ func GetAllReferenceTickers(apiKey string) ([]*polymodels.Ticker, *APIResponse, 
 }
 
 // GetReferenceTickers fetches tickers based on ReferenceTickerParams
-func GetReferenceTickers(apiKey string, params *ReferenceTickerParams) ([]*polymodels.Ticker, *APIResponse, error) {
+func GetReferenceTickers(apiKey string, params *ReferenceTickerParams) ([]*polymodels.Ticker, *Response, error) {
 	var req = fasthttp.AcquireRequest()
 	req.SetRequestURI("https://api.polygon.io/v3/reference/tickers")
 
@@ -84,13 +84,13 @@ func GetReferenceTickers(apiKey string, params *ReferenceTickerParams) ([]*polym
 	return getReferenceTickers(apiKey, req)
 }
 
-func getReferenceTickers(apiKey string, req *fasthttp.Request) ([]*polymodels.Ticker, *APIResponse, error) {
+func getReferenceTickers(apiKey string, req *fasthttp.Request) ([]*polymodels.Ticker, *Response, error) {
 
 	var resp = fasthttp.AcquireResponse()
 	defer fasthttp.ReleaseResponse(resp)
 
 	var tickers []*polymodels.Ticker
-	ar, err := do(apiKey, req, resp, &tickers, false)
+	ar, err := do(apiKey, req, resp, false, &tickers)
 	if err != nil {
 		return nil, ar, err
 	}

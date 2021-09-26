@@ -9,8 +9,8 @@ import (
 )
 
 // GetAllStockTrades gets all historic stock trades for the given date and ticker.
-// An *APIResponse will only be returned if one of the calls made resulted in an API error.
-func GetAllStockTrades(apiKey string, date time.Time, ticker string) ([]*polymodels.HistoricEquityTrade, *APIResponse, error) {
+// An *Response will only be returned if one of the calls made resulted in an API error.
+func GetAllStockTrades(apiKey string, date time.Time, ticker string) ([]*polymodels.HistoricEquityTrade, *Response, error) {
 
 	var req = fasthttp.AcquireRequest()
 	defer fasthttp.ReleaseRequest(req)
@@ -68,7 +68,7 @@ func GetAllStockTrades(apiKey string, date time.Time, ticker string) ([]*polymod
 }
 
 // GetStockTrades fetches historic trades based on StocksTradeParams
-func GetStockTrades(apiKey string, params *StocksTradeParams) ([]*polymodels.HistoricEquityTrade, *APIResponse, error) {
+func GetStockTrades(apiKey string, params *StocksTradeParams) ([]*polymodels.HistoricEquityTrade, *Response, error) {
 	var req = fasthttp.AcquireRequest()
 
 	var uri = fmt.Sprintf("https://api.polygon.io/v2/ticks/stocks/trades/%v/%v", params.Ticker, params.Date)
@@ -84,13 +84,13 @@ func GetStockTrades(apiKey string, params *StocksTradeParams) ([]*polymodels.His
 	return getStockTrades(apiKey, req, params.Ticker)
 }
 
-func getStockTrades(apiKey string, req *fasthttp.Request, ticker string) ([]*polymodels.HistoricEquityTrade, *APIResponse, error) {
+func getStockTrades(apiKey string, req *fasthttp.Request, ticker string) ([]*polymodels.HistoricEquityTrade, *Response, error) {
 
 	var resp = fasthttp.AcquireResponse()
 	defer fasthttp.ReleaseResponse(resp)
 
 	var trades []*polymodels.HistoricEquityTrade
-	ar, err := do(apiKey, req, resp, &trades, true)
+	ar, err := do(apiKey, req, resp, true, &trades)
 	if err != nil {
 		return nil, ar, err
 	}

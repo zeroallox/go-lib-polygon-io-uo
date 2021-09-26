@@ -6,17 +6,21 @@ import (
 )
 
 // CreateLocalPSVFile creates the correct directory structure within baseDir
-// and returns a handle to an empty io.File
+// and returns a handle to an empty io.File.
 func CreateLocalPSVFile(baseDir string, file *PSVFile) (*os.File, error) {
-	var err = os.MkdirAll(filepath.Join(baseDir, file.MakeDir()), os.ModePerm)
+	var err = os.MkdirAll(filepath.Join(baseDir, MakeDirPath(file)), os.ModePerm)
 	if err != nil {
 		return nil, err
 	}
 
-	return os.Create(filepath.Join(baseDir, file.MakeABSFilePath(file.compressed)))
+	return os.Create(filepath.Join(baseDir, MakeABSFilePath(file)))
 }
 
-// OpenLocalFile returns a handle to
+// OpenLocalPSVFile returns a handle to file within baseDir.
+//  Example:
+//  If you store your CSV's in /data and want to open a us-stocks-trade file
+//  we generate the correct path where the file should be and returns a handle
+//  to it.
 func OpenLocalPSVFile(baseDir string, file *PSVFile) (*os.File, error) {
-	return os.Open(filepath.Join(baseDir, file.MakeABSFilePath(file.compressed)))
+	return os.Open(filepath.Join(baseDir, MakeABSFilePath(file)))
 }

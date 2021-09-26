@@ -31,7 +31,7 @@ func NewPSVWriter(file *PSVFile, writer io.WriteCloser) (*Writer, error) {
 			return nil, err
 		}
 
-		gzr.Name = file.MakeFileName(false)
+		gzr.Name = makeFileName(file, false)
 		gzr.Comment = fmt.Sprintf("CreatedAt: %d", time.Now().UnixNano())
 
 		n.writer = gzr

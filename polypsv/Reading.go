@@ -57,14 +57,14 @@ func ReadUint(src []byte) (uint64, error) {
 	return strconv.ParseUint(fastByteToString(src), 10, 64)
 }
 
-var pipeChar = []byte("|")
-var semiColon = []byte(";")
+var bytePipeChar = []byte("|")
+var byteSemiColon = []byte(";")
 
 func ReadIntArray(src []byte) ([]int64, error) {
 
 	var arr []int64
 
-	for _, cInt := range bytes.Split(src, semiColon) {
+	for _, cInt := range bytes.Split(src, byteSemiColon) {
 
 		if len(cInt) == 0 {
 			continue
@@ -86,7 +86,7 @@ func ReadInt32Array(src []byte) ([]int32, error) {
 
 	var arr []int32
 
-	for _, cInt := range bytes.Split(src, semiColon) {
+	for _, cInt := range bytes.Split(src, byteSemiColon) {
 
 		if len(cInt) == 0 {
 			continue

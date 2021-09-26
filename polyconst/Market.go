@@ -9,7 +9,7 @@ const (
 	MKT_Stocks  Market = 1
 	MKT_Crypto  Market = 2
 	MKT_Forex   Market = 3
-	mkt_max     Market = 4
+	mkt_max     Market = iota
 )
 
 func (mkt Market) Code() string {

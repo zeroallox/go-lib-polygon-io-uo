@@ -295,17 +295,15 @@ func (cli *Client) beginReading() {
 
 func (cli *Client) beginPinging() {
 
-	var ctx = context.Background()
-
 	for {
 
 		if cli.isStopped() == true {
 			return
 		}
 
-		var err = cli.ws.Ping(ctx)
+		var err = cli.ws.Ping(context.Background())
 		if err != nil {
-			log.WithError(err).Error("pinging failed")
+			log.WithError(err).Debug("pinging failed")
 			return
 		}
 
@@ -332,10 +330,10 @@ func (cli *Client) reconnect() {
 // received messages.
 func (cli *Client) beginProcessMessage() {
 
-	log.Trace("Client: Start Processing Thread")
+	log.Debug("Client: Start Processing Thread")
 
 	defer func() {
-		log.Trace("Client: Exit Processing Thread")
+		log.Debug("Client: Exit Processing Thread")
 	}()
 
 	var localQueue []jsoniter.RawMessage
@@ -352,11 +350,6 @@ func (cli *Client) beginProcessMessage() {
 				}
 
 				cli.cond.Wait()
-			}
-
-			if cli.stop == true {
-				cli.cond.L.Unlock()
-				return
 			}
 
 			localQueue = append(localQueue, cli.msgQueue...)
