@@ -16,8 +16,6 @@ Not final or anywhere near it.
 
 Probably shouldn't be public.
 
-Intentionally does not use some go-isms due to performance.
-
 Stahppppppp.
 
 🍋
