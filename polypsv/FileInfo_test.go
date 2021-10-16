@@ -14,13 +14,13 @@ func TestNewFileFromPath(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    *PSVFile
+		want    *FileInfo
 		wantErr bool
 	}{
 		{
 			name: "ok",
-			args: args{path: "/Users/andrewialacci/Documents/scratch/polygon/us/stocks/trades/2020/2020-03/us-stocks-trades-2020-03-26.gz"},
-			want: &PSVFile{
+			args: args{path: "/Users/h4x/Documents/scratch/polygon/us/stocks/trades/2020/2020-03/us-stocks-trades-2020-03-26.gz"},
+			want: &FileInfo{
 				locale:     polyconst.LOC_USA,
 				market:     polyconst.MKT_Stocks,
 				dataType:   polyconst.DT_Trades,
@@ -45,7 +45,7 @@ func TestNewFileFromPath(t *testing.T) {
 
 func TestMakeDirPath(t *testing.T) {
 	type args struct {
-		file *PSVFile
+		file *FileInfo
 	}
 	tests := []struct {
 		name string
@@ -54,7 +54,7 @@ func TestMakeDirPath(t *testing.T) {
 	}{
 		{
 			name: "ok",
-			args: args{file: &PSVFile{
+			args: args{file: &FileInfo{
 				locale:     polyconst.LOC_USA,
 				market:     polyconst.MKT_Stocks,
 				dataType:   polyconst.DT_Trades,
@@ -75,7 +75,7 @@ func TestMakeDirPath(t *testing.T) {
 
 func Test_makeFileName(t *testing.T) {
 	type args struct {
-		file       *PSVFile
+		file       *FileInfo
 		compressed bool
 	}
 	tests := []struct {
@@ -86,7 +86,7 @@ func Test_makeFileName(t *testing.T) {
 		{
 			name: "ok compressed",
 			args: args{
-				file: &PSVFile{
+				file: &FileInfo{
 					locale:     polyconst.LOC_USA,
 					market:     polyconst.MKT_Stocks,
 					dataType:   polyconst.DT_Trades,
@@ -100,7 +100,7 @@ func Test_makeFileName(t *testing.T) {
 		{
 			name: "ok uncompressed",
 			args: args{
-				file: &PSVFile{
+				file: &FileInfo{
 					locale:     polyconst.LOC_USA,
 					market:     polyconst.MKT_Stocks,
 					dataType:   polyconst.DT_Trades,

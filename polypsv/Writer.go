@@ -18,7 +18,7 @@ type Writer struct {
 	didWriteHeader bool
 }
 
-func NewPSVWriter(file *PSVFile, writer io.WriteCloser) (*Writer, error) {
+func NewPSVWriter(file *FileInfo, writer io.WriteCloser) (*Writer, error) {
 
 	var n = new(Writer)
 	n.writer = writer

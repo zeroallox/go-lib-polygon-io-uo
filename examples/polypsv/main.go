@@ -33,7 +33,7 @@ func main() {
 
 	// Initialize a PSV file with the correct params for the data
 	// we'll be writing.
-	var psvFile = polypsv.NewPSVFile(polyconst.LOC_USA, polyconst.MKT_Stocks, tm, true)
+	var psvFile = polypsv.NewPSVFile(polyconst.LOC_USA, polyconst.MKT_Stocks, polyconst.DT_Trades, tm, true)
 
 	// Create a local file in the scratch dir.
 	hFile, err := polypsv.CreateLocalPSVFile(scratchDir, psvFile)
@@ -56,9 +56,9 @@ func main() {
 	writer.SetHeader(header)
 
 	// Download all the trades for AAPL from 2020-10-14
-	trades, rez, err := polyrest.GetAllStockTrades(apiKey, tm, "GUSH")
+	trades, ar, err := polyrest.GetAllStockTrades(apiKey, tm, "GUSH")
 	if err != nil {
-		log.Println(rez.String())
+		log.Println(ar.Error())
 		panic(err)
 	}
 
