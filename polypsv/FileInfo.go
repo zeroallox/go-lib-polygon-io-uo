@@ -21,7 +21,7 @@ type FileInfo struct {
 	compressed bool
 }
 
-func NewPSVFile(locale polyconst.Locale,
+func NewFileInfo(locale polyconst.Locale,
 	market polyconst.Market,
 	dataType polyconst.DataType,
 	date time.Time,
