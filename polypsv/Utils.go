@@ -29,22 +29,15 @@ func OpenLocalPSVFile(baseDir string, file *FileInfo) (*os.File, error) {
 }
 
 // GetLineCount returns the number of lines in the PSV file including the header.
-func GetLineCount(baseDir string, file *FileInfo) (uint, error) {
-
-    hFile, err := OpenLocalPSVFile(baseDir, file)
-    if err != nil {
-        return 0, err
-    }
-    defer func() {
-        _ = hFile.Close()
-    }()
+func GetLineCount(file *FileInfo, hFile io.Reader) (uint, error) {
 
     var reader io.Reader
     if file.Compressed() == true {
-        reader, err = gzip.NewReader(hFile)
+        gzr, err := gzip.NewReader(hFile)
         if err != nil {
             return 0, err
         }
+        reader = gzr
     } else {
         reader = hFile
     }
