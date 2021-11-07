@@ -33,17 +33,17 @@ func main() {
 
 	// Initialize a PSV file with the correct params for the data
 	// we'll be writing.
-	var psvFile = polypsv.NewFileInfo(polyconst.LOC_USA, polyconst.MKT_Stocks, polyconst.DT_Trades, tm, true)
+	var psvFile = polypsv.NewFileInfo(polyconst.LOC_USA, polyconst.MKT_Stocks, polyconst.DT_Trades, tm)
 
 	// Create a local file in the scratch dir.
-	hFile, err := polypsv.CreateLocalPSVFile(scratchDir, psvFile)
+	hFile, err := polypsv.CreateLocalPSVFile(scratchDir, psvFile, true)
 	if err != nil {
 		panic(err)
 	}
 	defer hFile.Close()
 
 	// Create a new PSV Writer
-	writer, err := polypsv.NewPSVWriter(psvFile, hFile)
+	writer, err := polypsv.NewWriter(psvFile, hFile, true)
 	if err != nil {
 		panic(err)
 	}

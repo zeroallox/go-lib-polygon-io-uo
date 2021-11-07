@@ -18,20 +18,20 @@ type Writer struct {
 	didWriteHeader bool
 }
 
-func NewPSVWriter(file *FileInfo, writer io.WriteCloser) (*Writer, error) {
+func NewWriter(file *FileInfo, writer io.WriteCloser, compress bool) (*Writer, error) {
 
 	var n = new(Writer)
 	n.writer = writer
 	n.sep = pipeCharByte
 
-	if file.Compressed() == true {
+	if compress == true {
 
 		gzr, err := gzip.NewWriterLevel(n.writer, flate.BestSpeed)
 		if err != nil {
 			return nil, err
 		}
 
-		gzr.Name = makeFileName(file, false)
+		gzr.Name = MakeFileName(file, false)
 		gzr.Comment = fmt.Sprintf("CreatedAt: %d", time.Now().UnixNano())
 
 		n.writer = gzr
@@ -59,6 +59,10 @@ func (this *Writer) Close() error {
 	}
 
 	if this.gzw != nil {
+		err = this.gzw.Flush()
+		if err != nil {
+			return err
+		}
 		err = this.gzw.Close()
 		if err != nil {
 			return err

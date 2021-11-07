@@ -24,8 +24,7 @@ type FileInfo struct {
 func NewFileInfo(locale polyconst.Locale,
 	market polyconst.Market,
 	dataType polyconst.DataType,
-	date time.Time,
-	compressed bool) *FileInfo {
+	date time.Time) *FileInfo {
 
 	var n = new(FileInfo)
 
@@ -33,7 +32,6 @@ func NewFileInfo(locale polyconst.Locale,
 	n.market = market
 	n.dataType = dataType
 	n.date = date
-	n.compressed = compressed
 
 	return n
 }
@@ -95,6 +93,10 @@ func (file *FileInfo) Locale() polyconst.Locale {
 	return file.locale
 }
 
+func (file *FileInfo) DataType() polyconst.DataType {
+	return file.dataType
+}
+
 func (file *FileInfo) Market() polyconst.Market {
 	return file.market
 }
@@ -123,14 +125,8 @@ func MakeDirPath(file *FileInfo) string {
 
 }
 
-// MakeFileName generates a file name for file.
-func MakeFileName(file *FileInfo) string {
-	return makeFileName(file, file.compressed)
-}
-
-// makeFileName returns the file name for a FileInfo. Compressed is
-// specified separately and overrides file.compressed.
-func makeFileName(file *FileInfo, compressed bool) string {
+// MakeFileName generates a file name for FileInfo.
+func MakeFileName(file *FileInfo, compressed bool) string {
 
 	year, month, day := file.date.Date()
 
@@ -150,6 +146,6 @@ func makeFileName(file *FileInfo, compressed bool) string {
 // MakeABSFilePath returns the absolute file path for file.
 //  Example:
 //  polygon/us/stocks/trades/2000/2000-01/us-stocks-trades-2000-01-01.gz
-func MakeABSFilePath(file *FileInfo) string {
-	return filepath.Join(MakeDirPath(file), MakeFileName(file))
+func MakeABSFilePath(file *FileInfo, compressed bool) string {
+	return filepath.Join(MakeDirPath(file), MakeFileName(file, compressed))
 }
