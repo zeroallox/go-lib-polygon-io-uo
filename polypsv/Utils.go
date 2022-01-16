@@ -1,69 +1,49 @@
 package polypsv
 
 import (
-    "bytes"
-    "github.com/klauspost/compress/gzip"
-    "io"
-    "os"
-    "path/filepath"
+	"fmt"
+	"path/filepath"
+	"strings"
 )
 
-// CreateLocalPSVFile creates the correct directory structure within baseDir
-// and returns a handle to an empty io.File.
-func CreateLocalPSVFile(baseDir string, file *FileInfo, compressed bool) (*os.File, error) {
-    var err = os.MkdirAll(filepath.Join(baseDir, MakeDirPath(file)), os.ModePerm)
-    if err != nil {
-        return nil, err
-    }
 
-    return os.Create(filepath.Join(baseDir, MakeABSFilePath(file, compressed)))
-}
-
-// OpenLocalPSVFile returns a handle to file within baseDir.
+// MakeDirPath generates the directory for file.
 //  Example:
-//  If you store your CSV's in /data and want to open a us-stocks-trade file
-//  we generate the correct path where the file should be and returns a handle
-//  to it.
-func OpenLocalPSVFile(baseDir string, file *FileInfo, compressed bool) (*os.File, error) {
-    return os.Open(filepath.Join(baseDir, MakeABSFilePath(file, compressed)))
+//  polygon/us/stocks/trades/2000/2000-01
+func MakeDirPath(file *FileInfo) string {
+
+	year, month, _ := file.date.Date()
+
+	return strings.ToLower(fmt.Sprintf("polygon/%v/%v/%v/%04d/%04d-%02d",
+		file.locale.Code(),
+		file.market.Code(),
+		file.dataType.Code(),
+		year,
+		year, month))
+
 }
 
-// GetLineCount returns the number of lines in the PSV file including the header.
-func GetLineCount(hFile io.Reader, file *FileInfo) (uint, error) {
+// MakeFileName generates a file name for FileInfo. compressed overrides FileInfo.Compressed.
+func MakeFileName(file *FileInfo, compressed bool) string {
 
-    var reader io.Reader
-    if file.Compressed() == true {
-        gzr, err := gzip.NewReader(hFile)
-        if err != nil {
-            return 0, err
-        }
-        reader = gzr
-    } else {
-        reader = hFile
-    }
+	year, month, day := file.date.Date()
 
-    count, err := countLines(reader)
-    if err != nil {
-        return 0, err
-    }
+	var ext = "psv"
+	if compressed == true {
+		ext = ext + ".gz"
+	}
 
-    return uint(count), nil
+	return strings.ToLower(fmt.Sprintf("%s-%s-%s-%04d-%02d-%02d.%v",
+		file.locale.Code(),
+		file.market.Code(),
+		file.dataType.Code(),
+		year, month, day, ext))
+
 }
 
-// Stolen from: https://stackoverflow.com/questions/24562942
-func countLines(r io.Reader) (int, error) {
-    var buf = make([]byte, 32*1024)
-    var count = 0
-
-    for {
-        c, err := r.Read(buf)
-        count += bytes.Count(buf[:c], newLineCharBytes)
-
-        switch {
-        case err == io.EOF:
-            return count, nil
-        case err != nil:
-            return count, err
-        }
-    }
+// MakeABSFilePath returns the absolute file path for file. compressed overrides FileInfo.Compressed.
+//  Example:
+//  polygon/us/stocks/trades/2000/2000-01/us-stocks-trades-2000-01-01.psv.gz
+func MakeABSFilePath(file *FileInfo, compressed bool) string {
+	return filepath.Join(MakeDirPath(file), MakeFileName(file, compressed))
 }
