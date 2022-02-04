@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const userAgent = "go-lib-polygon-io-uoc_0.0.1"
+const userAgent = "go-lib-polygon-io-uo"
 
 // do performs the HTTP request to Polygons API. We apply the API key and return
 // a *Response containing the API response information and a standard error
@@ -51,7 +51,6 @@ __RETRY:
 			retryCount = retryCount + 1
 			goto __RETRY
 		}
-
 	}
 
 	if ar.httpCode != fasthttp.StatusOK {
