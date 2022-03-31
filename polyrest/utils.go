@@ -1,18 +1,18 @@
 package polyrest
 
 import (
-    "github.com/google/go-querystring/query"
-    "github.com/valyala/fasthttp"
+	"github.com/google/go-querystring/query"
+	"github.com/valyala/fasthttp"
 )
 
 func buildRequest(req *fasthttp.Request, uri string, params interface{}) error {
-    req.SetRequestURI(uri)
+	req.SetRequestURI(uri)
 
-    v, err := query.Values(params)
-    if err != nil {
-        return err
-    }
-    req.URI().SetQueryString(v.Encode())
+	v, err := query.Values(params)
+	if err != nil {
+		return err
+	}
+	req.URI().SetQueryString(v.Encode())
 
-    return nil
+	return nil
 }

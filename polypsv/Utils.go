@@ -6,7 +6,6 @@ import (
 	"strings"
 )
 
-
 // MakeDirPath generates the directory for file.
 //  Example:
 //  polygon/us/stocks/trades/2000/2000-01

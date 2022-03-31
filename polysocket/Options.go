@@ -1,26 +1,30 @@
 package polysocket
 
 import (
-	"errors"
-	"time"
+    "errors"
+    "time"
 )
 
 type Options struct {
-	AutoReconnect         bool
-	AutoReconnectInterval time.Duration
-	APIKey                string
-	ClusterType           ClusterType
+    AutoReconnect         bool
+    AutoReconnectInterval time.Duration
+    APIKey                string
+    ClusterType           ClusterType
 }
 
 func validateOptions(options *Options) error {
 
-	if options.ClusterType == CTInvalid {
-		return errors.New("ClusterType Invalid")
-	}
+    if options.ClusterType == CTInvalid {
+        return errors.New("ClusterType Invalid")
+    }
 
-	if len(options.APIKey) == 0 {
-		return errors.New("invalid APIKey")
-	}
+    if len(options.APIKey) == 0 {
+        return errors.New("invalid APIKey")
+    }
 
-	return nil
+    if options.AutoReconnectInterval == 0 {
+        options.AutoReconnectInterval = defaultConnectionInterval
+    }
+
+    return nil
 }

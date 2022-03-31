@@ -1,6 +1,6 @@
 module github.com/zeroallox/go-lib-polygon-io-uo
 
-go 1.17
+go 1.18
 
 require (
 	github.com/google/go-querystring v1.1.0
